@@ -69,12 +69,12 @@ class UserSerializer(serializers.ModelSerializer):
 		return "%s %s" % (obj.first_name, obj.last_name)
 
 	def get_past_bookings(self, obj):
-		# today = datetime.today()
-		# bookings = obj.bookings.filter(check_in__lt=today)
-		# return PastBookingDetailsSerializer(bookings).data
-		booking_objects = Booking.objects.filter(check_in__lt=datetime.today())
-		past_bookings = PastBookingDetailsSerializer(booking_objects, many=True)
-		return past_bookings.data
+		today = datetime.today()
+		bookings = obj.bookings.filter(check_in__lt=today)
+		return PastBookingDetailsSerializer(bookings, many=True).data
+		# booking_objects = Booking.objects.filter(user=obj.user, check_in__lt=datetime.today())
+		# past_bookings = BookingSerializer(booking_objects, many=True)
+		# return past_bookings.data
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
