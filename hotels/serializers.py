@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
@@ -7,13 +8,13 @@ from .models import Hotel, Booking
 
 class HotelsListSerializer(serializers.ModelSerializer):
 	details = serializers.HyperlinkedIdentityField(
-		view_name = "hotel-detail",
+		view_name = "hotel-details",
 		lookup_field = "id",
 		lookup_url_kwarg = "hotel_id"
 		)
 	class Meta:
 		model = Hotel
-		fields = ['name', 'details']
+		fields = ['id', 'name', 'details']
 
 
 class HotelDetailsSerializer(serializers.ModelSerializer):
@@ -24,7 +25,7 @@ class HotelDetailsSerializer(serializers.ModelSerializer):
 		)
 	class Meta:
 		model = Hotel
-		fields = ["name", "location", "price", "book"]
+		fields = ["name", "location", "price_per_night", "book"]
 
 
 class BookHotelSerializer(serializers.ModelSerializer):
@@ -47,7 +48,7 @@ class BookingDetailsSerializer(serializers.ModelSerializer):
 		)
 	class Meta:
 		model = Booking
-		fields = ["hotel", "check_in", 'number_of_nights', 'modify']
+		fields = ["hotel", "check_in", 'number_of_nights', 'modify', 'cancel']
 
 
 class PastBookingDetailsSerializer(serializers.ModelSerializer):
@@ -64,14 +65,16 @@ class UserSerializer(serializers.ModelSerializer):
 		model = User
 		fields = ["username", "name", "email", "past_bookings"]
 
-	def name(self, obj):
-		return "%s %s"%(obj.first_name, obj.last_name)
+	def get_name(self, obj):
+		return "%s %s" % (obj.first_name, obj.last_name)
 
 	def get_past_bookings(self, obj):
-		today = datetime.today()
-		bookings = obj.bookings.filter(check_in__lt=today)
-		return PastBookingDetailsSerializer(bookings).data
-
+		# today = datetime.today()
+		# bookings = obj.bookings.filter(check_in__lt=today)
+		# return PastBookingDetailsSerializer(bookings).data
+		booking_objects = Booking.objects.filter(check_in__lt=datetime.today())
+		past_bookings = PastBookingDetailsSerializer(booking_objects, many=True)
+		return past_bookings.data
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

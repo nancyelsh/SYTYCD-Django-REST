@@ -8,7 +8,7 @@ class Hotel(models.Model):
 	price_per_night = models.DecimalField(max_digits=10, decimal_places=3)
 
 	def __str__(self):
-		return name
+		return "%s in %s" % (str(self.name), self.location)
 
 
 class Booking(models.Model):
